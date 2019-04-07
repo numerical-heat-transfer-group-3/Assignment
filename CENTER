@@ -1,0 +1,55 @@
+!LMM&WMQ
+subroutine center(aE,aW,aP,n,f0,fL,u)
+  real:: aE1,aW1,aP1,De,Dw,Fe,Fw,L,u,dx,f0,fL,ro,gama
+  real:: A(n,n),b(n),c(n-1),d(n),x(n)
+  integer::I,J,n
+  f0 = 1.0
+  fL = 0.0
+  L = 1.0
+  ro = 1.0
+  gama = 0.1
+  dx = L/n
+  De=gama/dx
+  Fe=ro*u
+  Dw=gama/dx
+  Fw=ro*u
+
+
+  aE1=De-Fe/2
+  aW1=Dw+Fw/2
+  aP1=aE1+aW1+(Fe-Fw)
+
+    A(n,n)=0
+
+    A(1,1)=0.5*Fe+3*De
+    A(1,2)=-(De-0.5*Fe)
+    b(1)=(2*De+Fe)*f0
+
+    do I=2,(n-1)
+        A(I,I-1)=-aW1
+        A(I,I)=aP1
+        A(I,I+1)=-aE1
+        b(I)=0
+    end do
+
+    A(n,n-1)=-(Dw+0.5*Fw)
+    A(n,n)=3*Dw-0.5*Fw
+    b(n)=(2*Dw-Fw)*fL
+
+
+    c(1)=A(1,2)/A(1,1)
+    d(1)=b(1)/A(1,1)
+    do I=2,(n-1)
+        c(I)=A(I,I+1)/(A(I,I)-c(I-1)*A(I,I-1))
+        d(I)=(b(I)-d(I-1)*A(I,I-1))/(A(I,I)-c(I-1)*A(I,I-1))
+    end do
+    d(n)=(b(n)-d(n-1)*A(n,n-1))/(A(n,n)-c(n-1)*A(n,n-1))
+    x(n)=d(n)
+
+
+    do I=1,(n-1)
+        x(n-I)=d(n-I)-c(n-I)*x(n-I+1)
+    end do
+
+    print*,'center f=',x
+    end subroutine center
